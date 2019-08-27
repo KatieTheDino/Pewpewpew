@@ -83,15 +83,6 @@ class SceneEvents_1 extends SceneScript
 	override public function init()
 	{
 		
-		/* ========================= When Drawing ========================= */
-		addWhenDrawingListener(null, function(g:G, x:Float, y:Float, list:Array<Dynamic>):Void
-		{
-			if(wrapper.enabled)
-			{
-				g.drawString("" + "bad bitches like me", (getScreenWidth() / 2), (getScreenHeight() / 5));
-			}
-		});
-		
 	}
 	
 	override public function forwardMessage(msg:String)

@@ -19,6 +19,7 @@ import com.stencyl.models.Scene;
 import com.stencyl.models.Sound;
 import com.stencyl.models.Region;
 import com.stencyl.models.Font;
+import com.stencyl.models.Joystick;
 
 import com.stencyl.Engine;
 import com.stencyl.Input;
@@ -69,115 +70,96 @@ import com.stencyl.graphics.shaders.BloomShader;
 
 
 class Design_7_7_FireBullet extends ActorScript
-{          	
+{
+	public var trigger:String;
+	public var speed:Float;
+	public var spawned:Actor;
+	public var bullet:ActorType;
+	public var shooterangle:Float;
+	public var bulletangle:Float;
+	public var sound:Sound;
+	public var _CanFire:Bool;
+	public var _BulletCreated:Actor;
+	public var _Fired:Bool;
+	public var _YOffset:Float;
+	public var _XOffset:Float;
+	public function _customEvent_whenThisHearstrigger():Void
+	{
+		if(_Fired)
+		{
+			if(!(_BulletCreated.isAlive()))
+			{
+				_CanFire = false;
+				propertyChanged("_CanFire", _CanFire);
+				_Fired = true;
+				propertyChanged("_Fired", _Fired);
+				createRecycledActor(bullet, (actor.getXCenter() + _XOffset), (actor.getYCenter() + _YOffset), Script.BACK);
+				_BulletCreated = getLastCreatedActor();
+				propertyChanged("_BulletCreated", _BulletCreated);
+				getLastCreatedActor().setX((getLastCreatedActor().getX() - ((getLastCreatedActor().getWidth()) / 2)));
+				getLastCreatedActor().setY((getLastCreatedActor().getY() - ((getLastCreatedActor().getHeight()) / 2)));
+				getLastCreatedActor().setAngle(Utils.RAD * (((Utils.DEG * (actor.getAngle()) + shooterangle) - bulletangle)));
+				getLastCreatedActor().setVelocity(((Utils.DEG * (actor.getAngle()) + shooterangle) - 180), speed);
+				playSound(sound);
+			}
+		}
+		else
+		{
+			_CanFire = false;
+			propertyChanged("_CanFire", _CanFire);
+			_Fired = true;
+			propertyChanged("_Fired", _Fired);
+			createRecycledActor(bullet, actor.getXCenter(), actor.getYCenter(), Script.MIDDLE);
+			_BulletCreated = getLastCreatedActor();
+			propertyChanged("_BulletCreated", _BulletCreated);
+			getLastCreatedActor().setX((getLastCreatedActor().getX() - ((getLastCreatedActor().getWidth()) / 2)));
+			getLastCreatedActor().setY((getLastCreatedActor().getY() - ((getLastCreatedActor().getHeight()) / 2)));
+			getLastCreatedActor().setAngle(Utils.RAD * (((Utils.DEG * (actor.getAngle()) + shooterangle) - bulletangle)));
+			getLastCreatedActor().setVelocity(((Utils.DEG * (actor.getAngle()) + shooterangle) - 180), speed);
+			playSound(sound);
+		}
+	}
 	
-public var trigger:String;
-
-public var speed:Float;
-
-public var spawned:Actor;
-
-public var bullet:ActorType;
-
-public var shooterangle:Float;
-
-public var bulletangle:Float;
-
-public var sound:Sound;
-
-public var _CanFire:Bool;
-
-public var _BulletCreated:Actor;
-
-public var _Fired:Bool;
-
-public var _YOffset:Float;
-
-public var _XOffset:Float;
-    public function _customEvent_whenThisHearstrigger():Void
-{
-        if(_Fired)
-{
-            if(!(_BulletCreated.isAlive()))
-{
-                _CanFire = false;
-propertyChanged("_CanFire", _CanFire);
-                _Fired = true;
-propertyChanged("_Fired", _Fired);
-                createRecycledActor(bullet, (actor.getXCenter() + _XOffset), (actor.getYCenter() + _YOffset), Script.BACK);
-                _BulletCreated = getLastCreatedActor();
-propertyChanged("_BulletCreated", _BulletCreated);
-                getLastCreatedActor().setX((getLastCreatedActor().getX() - ((getLastCreatedActor().getWidth()) / 2)));
-                getLastCreatedActor().setY((getLastCreatedActor().getY() - ((getLastCreatedActor().getHeight()) / 2)));
-                getLastCreatedActor().setAngle(Utils.RAD * (((Utils.DEG * (actor.getAngle()) + shooterangle) - bulletangle)));
-                getLastCreatedActor().setVelocity(((Utils.DEG * (actor.getAngle()) + shooterangle) - 180), speed);
-                playSound(sound);
-}
-
-}
-
-        else
-{
-            _CanFire = false;
-propertyChanged("_CanFire", _CanFire);
-            _Fired = true;
-propertyChanged("_Fired", _Fired);
-            createRecycledActor(bullet, actor.getXCenter(), actor.getYCenter(), Script.MIDDLE);
-            _BulletCreated = getLastCreatedActor();
-propertyChanged("_BulletCreated", _BulletCreated);
-            getLastCreatedActor().setX((getLastCreatedActor().getX() - ((getLastCreatedActor().getWidth()) / 2)));
-            getLastCreatedActor().setY((getLastCreatedActor().getY() - ((getLastCreatedActor().getHeight()) / 2)));
-            getLastCreatedActor().setAngle(Utils.RAD * (((Utils.DEG * (actor.getAngle()) + shooterangle) - bulletangle)));
-            getLastCreatedActor().setVelocity(((Utils.DEG * (actor.getAngle()) + shooterangle) - 180), speed);
-            playSound(sound);
-}
-
-}
-
-
- 
- 	public function new(dummy:Int, actor:Actor, dummy2:Engine)
+	
+	public function new(dummy:Int, actor:Actor, dummy2:Engine)
 	{
 		super(actor);
+		nameMap.set("Actor", "actor");
 		nameMap.set("Triggering Message", "trigger");
-trigger = "";
-nameMap.set("Speed", "speed");
-speed = 0.0;
-nameMap.set("spawned", "spawned");
-nameMap.set("Bullet", "bullet");
-nameMap.set("Inital Shooter Angle", "shooterangle");
-shooterangle = 0.0;
-nameMap.set("Inital Bullet Angle", "bulletangle");
-bulletangle = 270.0;
-nameMap.set("Sound to Play", "sound");
-nameMap.set("Can Fire?", "_CanFire");
-_CanFire = true;
-nameMap.set("Bullet Created", "_BulletCreated");
-nameMap.set("Fired", "_Fired");
-_Fired = false;
-nameMap.set("Y Offset", "_YOffset");
-_YOffset = 0.0;
-nameMap.set("X Offset", "_XOffset");
-_XOffset = 0.0;
-nameMap.set("Actor", "actor");
-
+		trigger = "";
+		nameMap.set("Speed", "speed");
+		speed = 0.0;
+		nameMap.set("spawned", "spawned");
+		nameMap.set("Bullet", "bullet");
+		nameMap.set("Inital Shooter Angle", "shooterangle");
+		shooterangle = 0.0;
+		nameMap.set("Inital Bullet Angle", "bulletangle");
+		bulletangle = 270.0;
+		nameMap.set("Sound to Play", "sound");
+		nameMap.set("Can Fire?", "_CanFire");
+		_CanFire = true;
+		nameMap.set("Bullet Created", "_BulletCreated");
+		nameMap.set("Fired", "_Fired");
+		_Fired = false;
+		nameMap.set("Y Offset", "_YOffset");
+		_YOffset = 0.0;
+		nameMap.set("X Offset", "_XOffset");
+		_XOffset = 0.0;
+		
 	}
 	
 	override public function init()
 	{
-		    
-/* ======================== When Creating ========================= */
-
-
-	}	      	
+		
+	}
 	
 	override public function forwardMessage(msg:String)
 	{
 		if(msg == ("_customEvent_" + trigger))
-{
-_customEvent_whenThisHearstrigger();
-return;
-}
-
+		{
+			_customEvent_whenThisHearstrigger();
+			return;
+		}
+		
 	}
 }
